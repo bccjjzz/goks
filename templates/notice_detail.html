@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>공지사항 상세 내용</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <!-- 기존 스타일과 스크립트 링크 -->
+</head>
+<body>
+    <div class="container">
+        <h1 class="header">공지사항 상세 내용</h1>
+        
+        <div class="category-content">
+            <h2>{{ selected_notice.title }}</h2>
+            <p>{{ selected_notice.content }}</p>
+            <p>작성일: {{ selected_notice.date_created }}</p>
+            <p>조회수: {{ selected_notice.read_count }}</p>
+            <a href="{{ url_for('admin') }}" class="logout-link">뒤로 가기</a>
+        </div>
+        
+        <!-- 기존 내용과 링크 -->
+    </div>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>사용자 정보</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+      /* 2023 Js Style copyright All reserved */
+
+        .user-info-box {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .role-admin {
+            background-color: #e74c3c;
+        }
+
+        /* 비밀번호 변경 폼 스타일 */
+        .password-change-form {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .password-change-form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .password-change-form input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .password-change-form button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .password-change-form button:hover {
+            background-color: #0056b3;
+        }
+
+        .user-info-container {
+            text-align: center;
+        }
+
+        .password-change-form {
+            margin: 0 auto;
+            text-align: center; /* 폼 가운데 정렬 */
+        }
+
+        .back-button {
+            display: inline-block;
+            background-color: #555;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #444;
+        }
+
+    </style>
+    <script>
+        /* 기존 스크립트 ... */
+    </script>
+</head>
+<body>
+    <h1>사용자 정보</h1>
+    <div class="user-info-container">
+        <div class="user-info-box">
+            <p><strong>아이디:</strong> {{ user.username }}</p>
+        </div>
+        <div class="user-info-box {{ 'role-admin' if user.role == 2 else '' }}">
+            <p><strong>역할:</strong> {{ '어드민' if user.role == 2 else '일반 유저' }}</p>
+        </div>
+    </div>
+
+    <h2>비밀번호 변경</h2>
+    <form method="POST" action="{{ url_for('user_info') }}" class="password-change-form">
+        <label for="new_password">새 비밀번호:</label>
+        <input type="password" id="new_password" name="new_password" required>
+        <button type="submit">변경</button>
+    </form>
+    
+    <a href="{{ url_for('user') }}" class="back-button">사용자 페이지로 돌아가기</a>
+</body>
+</html>

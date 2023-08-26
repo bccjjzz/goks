@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>관리자 페이지</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* 2023 Js Style copyright All reserved */
+
+        body {
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            color: #333;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .category-nav {
+            display: flex;
+            margin-top: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .category-button {
+            flex: 1;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .category-button:hover {
+            background-color: #2980b9;
+        }
+
+        .category-content {
+            display: none;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .form {
+            margin-top: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="time"],
+        input[type="datetime-local"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+
+        button[type="submit"] {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+
+        .logout-link {
+            text-align: center;
+            margin-top: 20px;
+            display: block;
+            color: #777;
+            text-decoration: none;
+        }
+
+        
+        .notice-list {
+            margin-top: 20px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .notice-list li {
+            margin-bottom: 10px;
+        }
+
+        .notice-list li a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .notice-list li a:hover {
+            text-decoration: underline;
+        }
+
+        .notice-content {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+
+        .status-box {
+            display: none;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-left: 5px;
+            transition: display 0.3s ease;
+        }
+
+        .success-box {
+            background-color: green;
+            color: white;
+        }
+
+        .error-box {
+            background-color: red;
+            color: white;
+        }
+        
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const categoryButtons = document.querySelectorAll(".category-button");
+            const categoryContents = document.querySelectorAll(".category-content");
+
+            categoryButtons.forEach((button, index) => {
+                button.addEventListener("click", function() {
+                    categoryContents.forEach(content => {
+                        content.style.display = "none";
+                    });
+                    categoryContents[index].style.display = "block";
+                });
+            });
+
+            const forms = document.querySelectorAll(".form");
+
+            forms.forEach(form => {
+                form.addEventListener("submit", async function(event) {
+                    event.preventDefault();
+                    const submitButton = form.querySelector("button[type='submit']");
+                    const statusBox = form.querySelector(".status-box");
+
+                    submitButton.disabled = true;
+                    statusBox.innerHTML = ""; 
+
+                    try {
+                        const response = await fetch(form.action, {
+                            method: form.method,
+                            body: new FormData(form)
+                        });
+
+                        if (response.ok) {
+                            statusBox.innerHTML = "&#10004;";
+                            statusBox.classList.add("success-box");
+                            statusBox.style.display = "block";
+
+                            setTimeout(() => {
+                                statusBox.style.display = "none";
+                                statusBox.classList.remove("success-box");
+                                submitButton.disabled = false;
+                            }, 3000);
+                        } else {
+                            statusBox.innerHTML = "&#10006;";
+                            statusBox.classList.add("error-box");
+                            statusBox.style.display = "block";
+
+                            setTimeout(() => {
+                                statusBox.style.display = "none";
+                                statusBox.classList.remove("error-box");
+                                submitButton.disabled = false;
+                            }, 3000);
+                        }
+                    } catch (error) {
+                        statusBox.innerHTML = "&#10006;";
+                        statusBox.classList.add("error-box");
+                        statusBox.style.display = "block";
+
+                        setTimeout(() => {
+                            statusBox.style.display = "none";
+                            statusBox.classList.remove("error-box");
+                            submitButton.disabled = false;
+                        }, 3000);
+                    }
+                });
+            });
+
+            const editButtons = document.querySelectorAll(".edit-button");
+
+            editButtons.forEach(editButton => {
+                editButton.addEventListener("click", function() {
+                    const noticeId = editButton.getAttribute("data-notice-id");
+                    const noticeTitle = document.getElementById("notice-title-" + noticeId).innerText;
+                    const noticeContent = document.getElementById("notice-content-" + noticeId).innerText;
+
+                    const editForm = document.querySelector(".edit-form");
+                    const editNoticeIdInput = editForm.querySelector("#edit-notice-id");
+                    const editNoticeTitleInput = editForm.querySelector("#edit-notice-title");
+                    const editNoticeContentInput = editForm.querySelector("#edit-notice-content");
+
+                    editNoticeIdInput.value = noticeId;
+                    editNoticeTitleInput.value = noticeTitle;
+                    editNoticeContentInput.value = noticeContent;
+
+                    categoryContents.forEach(content => {
+                        content.style.display = "none";
+                    });
+                    editForm.style.display = "block";
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="header">관리자 페이지</h1>
+        
+        <div class="category-nav">
+            <button class="category-button">축제 정보</button>
+            <button class="category-button">공지사항</button>
+            <button class="category-button">부스 위치</button>
+        </div>
+        
+        <div class="category-content">
+            <h2>축제 정보 추가</h2>
+            <form class="form" method="post" action="{{ url_for('admin') }}">
+                <input type="hidden" name="category" value="festival">
+                <label for="festival-name">축제 이름</label>
+                <input type="text" id="festival-name" name="name" required>
+                <label for="festival-datetime">날짜와 시간</label>
+                <input type="datetime-local" id="festival-datetime" name="datetime" required>
+                <button type="submit">추가</button>
+                <div class="status-box success-box">&#10004;</div>
+            </form>
+        </div>
+
+
+<div class="category-content">
+    <h2>공지사항 추가</h2>
+    <form class="form" method="post" action="{{ url_for('admin') }}">
+        <input type="hidden" name="category" value="notice">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="notice-title">제목</label>
+                <input type="text" id="notice-title" name="title" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="notice-content">내용</label>
+                <textarea id="notice-content" name="content" required rows="20"></textarea> <!-- rows 속성을 조절하여 높이 설정 -->
+            </div>
+        </div>
+        <button type="submit">추가</button>
+        <div class="status-box success-box">&#10004;</div>
+    </form>
+</div>
+
+        
+        <div class="category-content">
+            <h2>부스 위치 추가</h2>
+            <form class="form" method="post" action="{{ url_for('admin') }}">
+                <input type="hidden" name="category" value="booth">
+                <label for="booth-name">부스 이름</label>
+                <input type="text" id="booth-name" name="name" required>
+                <label for="booth-location">위치</label>
+                <input type="text" id="booth-location" name="location" required>
+                <button type="submit">추가</button>
+
+                <div class="status-box success-box">&#10004;</div>
+            </form>
+        </div>
+        
+        <a href="{{ url_for('logout') }}" class="logout-link">로그아웃</a>
+        
+
+        <div class="category-content">
+            <h2>공지사항 목록</h2>
+            <ul class="notice-list">
+                {% for notice in notices %}
+                    <li>
+                        <span id="notice-title-{{ notice.id }}">{{ notice.title }}</span>
+                        <span id="notice-content-{{ notice.id }}" style="display:none;">{{ notice.content }}</span>
+                        <a href="#" class="edit-button" data-notice-id="{{ notice.id }}">수정</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="category-content">
+            <h2>공지사항 수정</h2>
+            <form class="form edit-form" method="post" action="{{ url_for('edit_notice') }}">
+                <input type="hidden" name="category" value="notice">
+                <input type="hidden" name="notice_id" id="edit-notice-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-notice-title">제목</label>
+                        <input type="text" id="edit-notice-title" name="title" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-notice-content">내용</label>
+                        <textarea id="edit-notice-content" name="content" required></textarea>
+                    </div>
+                </div>
+                <button type="submit">수정</button>
+                <div class="status-box success-box">&#10004;</div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

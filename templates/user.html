@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome to 광성제</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* 2023 Js Style copyright All reserved */
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .user-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .categories {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .category-box {
+            flex: 1;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        .category-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .category-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .category-button:hover {
+            background-color: #0056b3;
+        }
+
+        .content-section {
+            display: none;
+            margin-top: 20px;
+            max-width: 800px;
+            border: 1px solid #ccc;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            margin: 0 auto;
+        }
+
+        .admin-section {
+            display: {{ 'block' if current_user.role == 2 else 'none' }};
+            margin-top: 20px;
+            max-width: 800px;
+            border: 1px solid #ccc;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            margin: 0 auto;
+        }
+
+         .user-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .user-info-button {
+            background-color: #ccc;
+            color: #333;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+       
+
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const categories = document.querySelectorAll(".category-button");
+            const contentSections = document.querySelectorAll(".content-section");
+            
+            categories.forEach(category => {
+                category.addEventListener("click", function() {
+                    const categoryId = this.getAttribute("data-category-id");
+                    contentSections.forEach(section => {
+                        section.style.display = "none";
+                    });
+                    const targetSection = document.getElementById(categoryId);
+                    if (targetSection) {
+                        targetSection.style.display = "block";
+                    }
+                });
+            });
+
+            const adminSection = document.querySelector(".admin-section");
+            if (adminSection) {
+                adminSection.style.display = "{{ 'block' if current_user.role == 2 else 'none' }}";
+            }
+
+            const noticeLinks = document.querySelectorAll(".notice-link");
+            const noticeContents = document.querySelectorAll(".notice-content");
+            noticeLinks.forEach(link => {
+                link.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    const noticeId = this.getAttribute("data-notice-id");
+                    const noticeContent = document.getElementById(`notice-content-${noticeId}`);
+                    if (noticeContent) {
+                        noticeContents.forEach(content => {
+                            content.style.display = "none";
+                        });
+                        noticeContent.style.display = "block";
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <br><br> <!-- 여백 추가 -->
+    <h1>광성제 - 홈페이지</h1>
+    
+    <a href="{{ url_for('user_info') }}" class="user-info-button">사용자 정보 보기</a>
+    <a href="{{ url_for('logout') }}" class="logout-button">로그아웃</a>
+
+    <br><br> <!-- 여백 추가 -->
+
+    <div class="user-container">
+        <div class="categories">
+            <div class="category-box">
+                <button class="category-button" data-category-id="notices">공지사항</button>
+            </div>
+            <div class="category-box">
+                <button class="category-button" data-category-id="festivals">축제 정보</button>
+            </div>
+            <div class="category-box">
+                <button class="category-button" data-category-id="food-prices">음식 가격</button>
+            </div>
+            <div class="category-box">
+                <button class="category-button" data-category-id="booth-locations">부스 위치</button>
+            </div>
+        </div>
+        <!-- 공지사항 목록 섹션 -->
+        <div class="content-section" id="notices">
+            <h2>공지사항</h2>
+            <table class="notice-table">
+                <thead>
+                    <tr>
+                        <th>제목</th>
+                        <th>작성일</th>
+                        <th>작성자</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notice in notices %}
+                        <tr>
+                            <td><a href="#" class="notice-link" data-notice-id="{{ notice.id }}">{{ notice.title }}</a></td>
+                            <td>{{ notice.date_created.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>{{ notice.author.username }}</td> 
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% for notice in notices %}
+                <div id="notice-content-{{ notice.id }}" class="notice-content" style="display: none;">
+                    <h3>{{ notice.title }}</h3>
+                    <p>내용: {{ notice.content }}</p>
+                    <p>작성자: {{ notice.author.username }}</p>
+                    <p>일시: {{ notice.date_created.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    <p>조회수: {{ notice.read_count }}</p>
+                </div>
+            {% endfor %}
+        </div>
+
+
+        <!-- 음식 가격 섹션 -->
+        <div class="content-section" id="food-prices">
+            <h2>음식가격</h2>
+            <table class="notice-table">
+                <thead>
+                    <tr>
+                        <th>이름</th>
+                        <th>가격 (원)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for food_price in food_prices %}
+                        <tr>
+                            <td>{{ food_price.name }}</td>
+                            <td>{{ food_price.price }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- 부스 위치 섹션 -->
+        <div class="content-section" id="booth-locations">
+            <h2>부스 위치</h2>
+            <table class="notice-table">
+                <thead>
+                    <tr>
+                        <th>부스 이름</th>
+                        <th>위치</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booth in booths %}
+                        <tr>
+                            <td>{{ booth.name }}</td>
+                            <td>{{ booth.location }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 축제 정보 섹션 -->
+        <div class="content-section" id="festivals">
+            <h2>축제 정보</h2>
+            <ul>
+                {% for festival in festivals %}
+                    <li>{{ festival.name }} - 날짜: {{ festival.date }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+
+        <!-- 관리자로 넘어가기 버튼 -->
+        {% if current_user.role == 2 %}
+        <div class="admin-section">
+            <a href="{{ url_for('admin') }}" class="category-button" style="background-color: #e74c3c;">관리자 페이지로 이동</a>
+        </div>
+        {% endif %}
+
+       
+
+    </div>
+</body>
+</html>
