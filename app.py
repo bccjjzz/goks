@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -180,17 +180,34 @@ def user():
     if current_user.is_authenticated:
         notices = Notice.query.all()
         booths = [
-            {"name": "컴퓨터동아리", "location": "A구역"},
-            {"name": "맛있는 음식 부스", "location": "B구역"},
-            {"name": "공연 무대", "location": "C구역"},
-            {"name": "", "location": "C구역"},
-            {"name": "공연 무대", "location": "C구역"},
-            {"name": "공연 무대", "location": "C구역"},
-            {"name": "공연 무대", "location": "C구역"},
-            {"name": "공연 무대", "location": "C구역"},
-            {"name": "공연 무대", "location": "C구역"},
-            {"name": "공연 무대", "location": "C구역"},
-            {"name": "공연 무대", "location": "C구역"}
+            {"donga": "경제경영부", "name": "OX퀴즈", "location": "5-1 강의실"},
+            {"donga": "공학연구부", "name": "공학 결과물 전시, RC카 체험", "location": "공학연구실"},
+            {"donga": "과학의정석", "name": "타이다이 티셔츠", "location": "종합과학실1"},
+            {"donga": "농구부", "name": "3x3 농구대회", "location": "체육관"},
+            {"donga": "댄스부", "name": "댄스공연", "location": "대강당 (3부에)"},
+            {"donga": "도서부", "name": "북카페", "location": "도서관"},
+            {"donga": "또래상담부", "name": "wee카페", "location": "wee클래스"},
+            {"donga": "만화애니메이션연구부", "name": "만화애니 전시", "location": "4-2 강의실"},
+            {"donga": "문예부", "name": "삼행시 대회, 인생 문장 대회", "location": "도서관 앞 복도"},
+            {"donga": "미디어컨텐츠부", "name": "인생광성컷", "location": "교수법연구실"},
+            {"donga": "미술부", "name": "타투, 페이스페인팅", "location": "2층 로비"},
+            {"donga": "수학부", "name": "암산왕", "location": "1-9반"},
+            {"donga": "스포츠클라이밍부", "name": "맨몸운동 경진대회", "location": "운동장 철봉 앞"},
+            {"donga": "시스템소프트웨어개발부", "name": "반응형 홈페이지 & 게임", "location": "공학연구실"},
+            {"donga": "신문부", "name": "신문 퀴즈", "location": "1-10반"},
+            {"donga": "아키텍처부", "name": "건축 모형 전시 및 퀴즈", "location": "2층 복도"},
+            {"donga": "연극부", "name": "종이비행기", "location": "2층 복도"},
+            {"donga": "영자신문부", "name": "하와이 보이즈", "location": "대회의실"},
+            {"donga": "정치외교부", "name": "도전 골든벨", "location": "1-3반"},
+            {"donga": "지구우주과학부", "name": "우리은하", "location": "종합과학실2"},
+            {"donga": "피포페인팅부", "name": "피포페인팅 전시", "location": "4-1 강의실"},
+            {"donga": "하리스뮤지컬중창단", "name": "뮤지컬 '영웅'", "location": "대강당 (3부에)"},
+            {"donga": "하리스찬양단", "name": "밴드공연", "location": "대강당 (3부에)"},
+            {"donga": "학교대표축구부", "name": "구속테스트와 축구 다트", "location": "운동장"},
+        ]
+
+        Fes = [
+            {"name": "", "time": ""}
         ]
         
         read_notice_ids = session.get('read_notice_ids', [])  # 읽은 공지사항 ID 리스트
@@ -318,9 +335,26 @@ def admin_search_user():
     return render_template('admin.html', searched_user=searched_user)
 
 
+@app.route('/download/<filename>')
+def download(filename):
+    # 실제 파일 경로를 지정해주세요.
+    file_path = '/home/ubuntu/goks/instance' + filename  # 예: 'static/downloads/' + filename
+    
+    try:
+        # 파일을 읽어서 Response로 반환하면 다운로드 됩니다.
+        return send_file(file_path, as_attachment=True)
+    except FileNotFoundError:
+        return "File not found."
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template("404.html")
+
+
 # 앱 실행
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # 데이터베이스 테이블 생성
-    app.run(host='0.0.0.0')
+    app.run(host="0.0.0.0", port=80)
 
